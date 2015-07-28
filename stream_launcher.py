@@ -1,13 +1,16 @@
 from argparse import ArgumentParser
 from sys import stderr
 from subprocess import call
+from pprint import pprint
+from os.path import join
+from json import load, dump
 
-from rfc3987 import match
 from appdirs import user_data_dir
+from rfc3987 import match
 
 __author__ = 'ikamashev'
 APPLICATION_NAME = 'stream_launcher'
-MOST_USED_FILE = ''
+STAT_FILE_NAME = 'most_used.dat'
 
 nick_dict = {
     'holly': 'http://twitch.tv/holly_forve',
@@ -18,22 +21,55 @@ nick_dict = {
 }
 
 
-def count_usage(url):
+class UserStat:
+    def __init__(self):
+        self.urlCounter = {}
+        self.fname = join(user_data_dir(APPLICATION_NAME), STAT_FILE_NAME)
+
+    def __open(self, mode):
+        try:
+            rv = open(self.fname, mode)
+        except FileNotFoundError:
+            rv = None
+        except IOError as err:
+            print("Can't open statistics: file {0}, error {1}".format(self.fname, err), file=stderr)
+            rv = None
+        return rv
+
+    def load(self):
+        f = self.__open('r')
+        if f:
+            self.urlCounter = load(f)
+
+    def save(self):
+        f = self.__open('w')
+        if f:
+            dump(self.urlCounter,f)
+
+    def add_usage(self, url):
+        if url in self.urlCounter:
+            self.urlCounter[url] += 1
+        else:
+            self.urlCounter[url] = 0
+
+    def print(self):
+        pprint(self.urlCounter)
 
 
-def assemble_command(arguments: object):
+def assemble_command(arguments, statistics):
     streamer = arguments.streamer
     url = ''
 
     if match(streamer, 'absolute_URI'):
         url = streamer
-        count_usage(url)
+        statistics.add_usage(url)
     elif streamer in nick_dict:
         url = nick_dict[streamer]
     else:
         print("nick", streamer, "is not defined yet", file=stderr)
         return 1
 
+    statistics.save()
     quality = ''
     player_command = ''
     if arguments.mode == 'video':
@@ -59,12 +95,25 @@ def assemble_command(arguments: object):
 
 def launch_the_stream():
     cmdParser = ArgumentParser(description='Wrapper for livestreamer tool')
-    cmdParser.add_argument('streamer', help="Streamer's nick name or URL of the stream")
-    cmdParser.add_argument('mode', help='Video or audio only', choices=['audio', 'video'])
-    cmdParser.add_argument('-n', '--dry-run', help='Write the command string to stdout, but do not execute it',
-                           action='store_true')
+    cmdParser.add_argument('streamer', nargs='?', help="Streamer's nick name or URL of the stream")
+    cmdParser.add_argument('mode', nargs='?', help='Video or audio only', choices=['audio', 'video'])
+    group = cmdParser.add_mutually_exclusive_group()
+    group.add_argument('-n', '--dry-run', help='Write the command string to stdout, but do not execute it',
+                       action='store_true')
+    group.add_argument('-s', '--stat', help='Print usage statistics and exit',
+                       action='store_true')
     arguments = cmdParser.parse_args()
-    return assemble_command(arguments)
+
+    rv = 0
+    statistics = UserStat()
+    statistics.load()
+    if arguments.stat:
+        statistics.print()
+    else:
+        rv = assemble_command(arguments, statistics)
+
+    return rv
+
 
 if __name__ == '__main__':
     launch_the_stream()
