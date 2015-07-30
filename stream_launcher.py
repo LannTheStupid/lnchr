@@ -54,7 +54,6 @@ class UserStat:
 
 def assemble_command(arguments, statistics):
     streamer = arguments.streamer
-    url = ''
 
     if match(streamer, 'absolute_URI'):
         url = streamer
@@ -66,7 +65,6 @@ def assemble_command(arguments, statistics):
         return 1
 
     statistics.save()
-    quality = ''
     player_command = ''
     if arguments.mode == 'video':
         quality = 'best'
