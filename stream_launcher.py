@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+from os import makedirs
 from sys import stderr
 from subprocess import call
 from pprint import pformat
@@ -24,27 +25,17 @@ nick_dict = {
 class UserStat:
     def __init__(self):
         self.urlCounter = {}
-        self.fname = join(user_data_dir(APPLICATION_NAME), STAT_FILE_NAME)
-
-    def __open(self, mode):
-        try:
-            rv = open(self.fname, mode)
-        except FileNotFoundError:
-            rv = None
-        except IOError as err:
-            print("Can't open statistics: file {0}, error {1}".format(self.fname, err), file=stderr)
-            rv = None
-        return rv
+        self.dirname = user_data_dir(APPLICATION_NAME, False)
+        self.fname = join(self.dirname, STAT_FILE_NAME)
 
     def load(self):
-        f = self.__open('r')
-        if f:
+        with open(self.fname, 'r') as f:
             self.urlCounter = load(f)
 
     def save(self):
-        f = self.__open('w')
-        if f:
-            dump(self.urlCounter,f)
+        makedirs(self.dirname, exist_ok=True)
+        with open(self.fname, 'w+') as f:
+            dump(self.urlCounter, f)
 
     def add_usage(self, url):
         if url in self.urlCounter:
