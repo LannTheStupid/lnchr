@@ -1,9 +1,10 @@
-from os.path import exists
-from stream_launcher import UserStat
-from appdirs import user_data_dir
-
 import os
 import unittest
+
+from appdirs import user_data_dir
+
+from stream_launcher import UserStat
+
 
 class UserStatTest(unittest.TestCase):
     def setUp(self):
@@ -17,7 +18,7 @@ class UserStatTest(unittest.TestCase):
             pass
 
     def test_empty_hash(self):
-        self.assertEqual(self.stat.toString(), '{}')
+        self.assertEqual(self.stat.toString(), '[]')
 
     def test_add_usage(self):
         self.stat.add_usage('http://twitch.tv/holly_forve')
@@ -25,7 +26,7 @@ class UserStatTest(unittest.TestCase):
         self.stat.add_usage('http://twitch.tv/holly_forve')
 
         self.assertEqual(self.stat.toString(),
-                         "{'http://cybergame.tv/skymaybe': 1, 'http://twitch.tv/holly_forve': 2}")
+                         "[('http://twitch.tv/holly_forve', 2), ('http://cybergame.tv/skymaybe', 1)]")
 
     def test_save(self):
         self.stat.add_usage('http://twitch.tv/holly_forve')
@@ -33,7 +34,6 @@ class UserStatTest(unittest.TestCase):
         self.stat.add_usage('http://twitch.tv/holly_forve')
         self.stat.save()
         self.assertTrue(os.path.isfile(self.filename))
-
 
     def test_load_from_non_existent(self):
         self.stat.load()
@@ -46,6 +46,7 @@ class UserStatTest(unittest.TestCase):
 
         self.stat.load()
         self.assertTrue(self.stat.toString(), '{"http://twitch.tv/holly_forve": 2, "http://cybergame.tv/skymaybe": 1}')
+
 
 if __name__ == '__main__':
     unittest.main()

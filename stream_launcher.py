@@ -5,6 +5,7 @@ from subprocess import call
 from pprint import pformat
 from os.path import join
 from json import load, dump
+from operator import itemgetter
 
 from appdirs import user_data_dir
 from rfc3987 import match
@@ -49,7 +50,9 @@ class UserStat:
             self.urlCounter[url] = 1
 
     def toString(self):
-        return pformat(self.urlCounter)
+        return pformat(sorted(self.urlCounter.items(),
+                              key=itemgetter(1),
+                              reverse=True))
 
 
 def assemble_command(arguments, statistics):
