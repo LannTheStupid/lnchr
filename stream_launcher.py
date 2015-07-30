@@ -18,7 +18,8 @@ nick_dict = {
     'fr0st': 'http://twitch.tv/fr0stix',
     'belka': 'http://cybergame.tv/lenko-romashka/',
     'seehaja': 'http://goodgame.ru/channel/kettari/',
-    'sky': 'http://twitch.tv/skymaybe'
+    'sky': 'http://twitch.tv/skymaybe',
+    'J': 'http://twitch.tv/entropicJ'
 }
 
 
@@ -36,9 +37,10 @@ class UserStat:
             pass
 
     def save(self):
-        makedirs(self.dirname, exist_ok=True)
-        with open(self.fname, 'w+') as f:
-            dump(self.urlCounter, f)
+        if self.urlCounter:
+            makedirs(self.dirname, exist_ok=True)
+            with open(self.fname, 'w+') as f:
+                dump(self.urlCounter, f)
 
     def add_usage(self, url):
         if url in self.urlCounter:
