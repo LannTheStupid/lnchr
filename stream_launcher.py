@@ -29,8 +29,11 @@ class UserStat:
         self.fname = join(self.dirname, STAT_FILE_NAME)
 
     def load(self):
-        with open(self.fname, 'r') as f:
-            self.urlCounter = load(f)
+        try:
+            with open(self.fname, 'r') as f:
+                self.urlCounter = load(f)
+        except:
+            pass
 
     def save(self):
         makedirs(self.dirname, exist_ok=True)
