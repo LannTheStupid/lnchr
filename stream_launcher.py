@@ -20,7 +20,8 @@ nick_dict = {
     'belka': 'http://cybergame.tv/lenko-romashka/',
     'seehaja': 'http://goodgame.ru/channel/kettari/',
     'sky': 'http://twitch.tv/skymaybe',
-    'J': 'http://twitch.tv/entropicJ'
+    'J': 'http://twitch.tv/entropicJ',
+    'paniko': 'http://twitch.tv/pani_ko'
 }
 
 
