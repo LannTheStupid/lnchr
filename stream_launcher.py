@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 from sys import stderr
 from subprocess import call
-from pprint import pprint
+from pprint import pformat
 from os.path import join
 from json import load, dump
 
@@ -50,10 +50,10 @@ class UserStat:
         if url in self.urlCounter:
             self.urlCounter[url] += 1
         else:
-            self.urlCounter[url] = 0
+            self.urlCounter[url] = 1
 
-    def print(self):
-        pprint(self.urlCounter)
+    def toString(self):
+        return pformat(self.urlCounter)
 
 
 def assemble_command(arguments, statistics):
@@ -108,7 +108,7 @@ def launch_the_stream():
     statistics = UserStat()
     statistics.load()
     if arguments.stat:
-        statistics.print()
+        print(statistics.toString())
     else:
         rv = assemble_command(arguments, statistics)
 
