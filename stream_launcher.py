@@ -20,8 +20,9 @@ nick_dict = {
     'belka': 'http://cybergame.tv/lenko-romashka/',
     'seehaja': 'http://goodgame.ru/channel/kettari/',
     'sky': 'http://twitch.tv/skymaybe',
-    'J': 'http://twitch.tv/entropicJ',
-    'paniko': 'http://twitch.tv/pani_ko'
+    'tornis': 'http://twitch.tv/tornis',
+    'paniko': 'http://twitch.tv/pani_ko',
+    'alinity': 'http://twitch.tv/alinity'
 }
 
 
@@ -65,7 +66,7 @@ def assemble_command(arguments, statistics):
     elif streamer in nick_dict:
         url = nick_dict[streamer]
     else:
-        print("nick", streamer, "is not defined yet", file=stderr)
+        print("Nickname", streamer, "has not been defined yet", file=stderr)
         return 1
 
     statistics.save()
