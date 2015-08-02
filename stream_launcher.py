@@ -18,7 +18,7 @@ nick_dict = {
     'holly': 'http://twitch.tv/holly_forve',
     'fr0st': 'http://twitch.tv/fr0stix',
     'belka': 'http://cybergame.tv/lenko-romashka/',
-    'seehaja': 'http://goodgame.ru/channel/kettari/',
+    'seehaja': 'http://www.twitch.tv/seehaja',
     'sky': 'http://twitch.tv/skymaybe',
     'tornis': 'http://twitch.tv/tornis',
     'paniko': 'http://twitch.tv/pani_ko',
