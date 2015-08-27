@@ -1,49 +1,37 @@
 from argparse import ArgumentParser
-from os import makedirs
 from sys import stderr
 from subprocess import call
 from pprint import pformat
-from os.path import join
-from json import load, dump
 from operator import itemgetter
-
-from appdirs import user_data_dir
 from rfc3987 import match
 
-__author__ = 'ikamashev'
+from application_local_file import ApplicationLocalFile
+
 APPLICATION_NAME = 'stream_launcher'
 STAT_FILE_NAME = 'most_used.dat'
+ALIAS_FILE_NAME = 'aliases.dat'
 
-nick_dict = {
-    'holly': 'http://twitch.tv/holly_forve',
-    'fr0st': 'http://twitch.tv/fr0stix',
-    'belka': 'http://cybergame.tv/lenko-romashka/',
-    'seehaja': 'http://www.twitch.tv/seehaja',
-    'sky': 'http://twitch.tv/skymaybe',
-    'tornis': 'http://twitch.tv/tornis',
-    'paniko': 'http://twitch.tv/pani_ko',
-    'alinity': 'http://twitch.tv/alinity'
-}
+class Nicknames(ApplicationLocalFile):
+    def __init__(self, filename_):
+        super().__init__(APPLICATION_NAME, filename_)
+        self.nick_dict = super().load()
 
+    def find(self, nick):
+        return nick in self.nick_dict
 
-class UserStat:
-    def __init__(self):
+    def get(self, nick):
+        if nick in self.nick_dict:
+            return self.nick_dict[nick]
+        else:
+            return False
+
+    def __str__(self):
+        return pformat(sorted(self.nick_dict.items()))
+
+class UserStat(ApplicationLocalFile):
+    def __init__(self, filename_):
         self.urlCounter = {}
-        self.dirname = user_data_dir(APPLICATION_NAME, False)
-        self.fname = join(self.dirname, STAT_FILE_NAME)
-
-    def load(self):
-        try:
-            with open(self.fname, 'r') as f:
-                self.urlCounter = load(f)
-        except:
-            pass
-
-    def save(self):
-        if self.urlCounter:
-            makedirs(self.dirname, exist_ok=True)
-            with open(self.fname, 'w+') as f:
-                dump(self.urlCounter, f)
+        super().__init__(APPLICATION_NAME, filename_)
 
     def add_usage(self, url):
         if url in self.urlCounter:
@@ -51,20 +39,28 @@ class UserStat:
         else:
             self.urlCounter[url] = 1
 
-    def toString(self):
-        return pformat(sorted(self.urlCounter.items(),
-                              key=itemgetter(1),
-                              reverse=True))
+    def save(self):
+        super().save(self.urlCounter)
 
+    def load(self):
+        self.urlCounter = super().load()
 
-def assemble_command(arguments, statistics):
+    def __str__(self):
+        if self.urlCounter:
+            return pformat(sorted(self.urlCounter.items(),
+                                  key=itemgetter(1),
+                                  reverse=True))
+        else:
+            return '{}'
+
+def assemble_command(arguments, statistics, nicknames):
     streamer = arguments.streamer
 
     if match(streamer, 'absolute_URI'):
         url = streamer
         statistics.add_usage(url)
-    elif streamer in nick_dict:
-        url = nick_dict[streamer]
+    elif nicknames.find(streamer):
+        url = nicknames.get(streamer)
     else:
         print("Nickname", streamer, "has not been defined yet", file=stderr)
         return 1
@@ -101,15 +97,21 @@ def launch_the_stream():
                        action='store_true')
     group.add_argument('-s', '--stat', help='Print usage statistics and exit',
                        action='store_true')
+    group.add_argument('-a', '--aliases', help='Print available aliases and exit',
+                       action='store_true')
     arguments = cmdParser.parse_args()
 
     rv = 0
-    statistics = UserStat()
+    statistics = UserStat(STAT_FILE_NAME)
     statistics.load()
+    nicknames = Nicknames(ALIAS_FILE_NAME)
+    nicknames.load()
     if arguments.stat:
-        print(statistics.toString())
+        print(str(statistics))
+    elif arguments.aliases:
+        print(str(nicknames))
     else:
-        rv = assemble_command(arguments, statistics)
+        rv = assemble_command(arguments, statistics, nicknames)
 
     return rv
 
