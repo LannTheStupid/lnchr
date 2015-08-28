@@ -39,10 +39,10 @@ class UserStat(ApplicationLocalFile):
         else:
             self.urlCounter[url] = 1
 
-    def save(self):
+    def save_data(self):
         super().save(self.urlCounter)
 
-    def load(self):
+    def load_data(self):
         self.urlCounter = super().load()
 
     def __str__(self):
@@ -65,7 +65,7 @@ def assemble_command(arguments, statistics, nicknames):
         print("Nickname", streamer, "has not been defined yet", file=stderr)
         return 1
 
-    statistics.save()
+    statistics.save_data()
     player_command = ''
     if arguments.mode == 'video':
         quality = 'best'
@@ -103,7 +103,7 @@ def launch_the_stream():
 
     rv = 0
     statistics = UserStat(STAT_FILE_NAME)
-    statistics.load()
+    statistics.load_data()
     nicknames = Nicknames(ALIAS_FILE_NAME)
     nicknames.load()
     if arguments.stat:

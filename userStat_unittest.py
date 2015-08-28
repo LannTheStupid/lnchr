@@ -18,7 +18,7 @@ class UserStatTest(unittest.TestCase):
             pass
 
     def test_empty_hash(self):
-        self.assertEqual(str.format("{0}", self.stat), '[]')
+        self.assertEqual(str.format("{0}", self.stat), '{}')
 
     def test_add_usage(self):
         self.stat.add_usage('http://twitch.tv/holly_forve')
@@ -32,11 +32,11 @@ class UserStatTest(unittest.TestCase):
         self.stat.add_usage('http://twitch.tv/holly_forve')
         self.stat.add_usage('http://cybergame.tv/skymaybe')
         self.stat.add_usage('http://twitch.tv/holly_forve')
-        self.stat.save()
+        self.stat.save_data()
         self.assertTrue(path.isfile(self.filename))
 
     def test_load_from_non_existent(self):
-        self.stat.load()
+        self.stat.load_data()
 
         self.assertTrue(str(self.stat), '{}')
 
@@ -44,7 +44,7 @@ class UserStatTest(unittest.TestCase):
         with open(self.filename, 'w+') as f:
             f.write('{"http://twitch.tv/holly_forve": 2, "http://cybergame.tv/skymaybe": 1}')
 
-        self.stat.load()
+        self.stat.load_data()
         self.assertTrue(str(self.stat), '{"http://twitch.tv/holly_forve": 2, "http://cybergame.tv/skymaybe": 1}')
 
 
