@@ -3,13 +3,13 @@ import unittest
 
 from appdirs import user_data_dir
 
-import stream_launcher
+import application_local_file
 
 
 class UserStatTest(unittest.TestCase):
     def setUp(self):
-        self.stat = stream_launcher.UserStat('test.dat')
-        self.filename = path.join(user_data_dir('stream_launcher', False), 'test.dat')
+        self.stat = application_local_file.UserStat('test_app', 'test.dat')
+        self.filename = path.join(user_data_dir('test_app', False), 'test.dat')
 
     def tearDown(self):
         try:
@@ -32,11 +32,11 @@ class UserStatTest(unittest.TestCase):
         self.stat.add_usage('http://twitch.tv/holly_forve')
         self.stat.add_usage('http://cybergame.tv/skymaybe')
         self.stat.add_usage('http://twitch.tv/holly_forve')
-        self.stat.save_data()
+        self.stat.save()
         self.assertTrue(path.isfile(self.filename))
 
     def test_load_from_non_existent(self):
-        self.stat.load_data()
+        self.stat.load()
 
         self.assertTrue(str(self.stat), '{}')
 
@@ -44,7 +44,7 @@ class UserStatTest(unittest.TestCase):
         with open(self.filename, 'w+') as f:
             f.write('{"http://twitch.tv/holly_forve": 2, "http://cybergame.tv/skymaybe": 1}')
 
-        self.stat.load_data()
+        self.stat.load()
         self.assertTrue(str(self.stat), '{"http://twitch.tv/holly_forve": 2, "http://cybergame.tv/skymaybe": 1}')
 
 
