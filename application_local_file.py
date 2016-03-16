@@ -63,6 +63,9 @@ class UserStat(ApplicationLocalFile):
     def load(self):
         self.urlCounter = super().load()
 
+    def trim(self, threshold):
+        self.urlCounter = {k: v for (k,v) in self.urlCounter.items() if v > threshold}
+
     def __str__(self):
         if self.urlCounter:
             return pformat(sorted(self.urlCounter.items(),
