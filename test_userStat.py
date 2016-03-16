@@ -45,8 +45,17 @@ class UserStatTest(unittest.TestCase):
             f.write('{"http://twitch.tv/holly_forve": 2, "http://cybergame.tv/skymaybe": 1}')
 
         self.stat.load()
-        self.assertTrue(str(self.stat), '{"http://twitch.tv/holly_forve": 2, "http://cybergame.tv/skymaybe": 1}')
+        self.assertEqual(str(self.stat), "[('http://twitch.tv/holly_forve', 2), ('http://cybergame.tv/skymaybe', 1)]")
 
+    def test_trim(self):
+        self.stat.add_usage('http://twitch.tv/adybah')
+        self.stat.add_usage('http://twitch.tv/belkao_o')
+        self.stat.add_usage('http://cybergame.tv/cuddlez')
+        self.stat.add_usage('http://twitch.tv/belkao_o')
+        self.stat.add_usage('http://twitch.tv/manana')
+
+        self.stat.trim(1)
+        self.assertEqual(str(self.stat), "[('http://twitch.tv/belkao_o', 2)]")
 
 if __name__ == '__main__':
     unittest.main()

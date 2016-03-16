@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 from subprocess import call
-from sys import stderr
+from sys import stderr, argv
 
 from rfc3987 import match
 
@@ -39,25 +39,27 @@ def assemble_command(arguments, statistics, nicknames):
 
     if arguments.dry_run:
         print("The resulting command string:")
-        print("[ ", exec_string, " ]");
+        print("[ ", exec_string, " ]")
         return 0
     else:
         print('The real execution starts here')
         return call(exec_string, shell=False)
 
-
-def launch_the_stream():
+def create_parser():
     command_parser = ArgumentParser(description='Wrapper for livestreamer tool')
     command_parser.add_argument('streamer', nargs='?', help="Streamer's nick name or URL of the stream")
     command_parser.add_argument('mode', nargs='?', help='Video or audio only', choices=['audio', 'video'])
     group = command_parser.add_mutually_exclusive_group()
-    group.add_argument('-n', '--dry-run', help='Write the command string to stdout, but do not execute it',
-                       action='store_true')
-    group.add_argument('-s', '--stat', help='Print usage statistics and exit',
-                       action='store_true')
-    group.add_argument('-a', '--aliases', help='Print available aliases and exit',
-                       action='store_true')
-    arguments = command_parser.parse_args()
+    group.add_argument('-n', '--dry-run', help='Write the command string to stdout, but do not execute it', action='store_true')
+    group.add_argument('-s', '--stat', help='Print usage statistics and exit', action='store_true')
+    group.add_argument('-a', '--aliases', help='Print available aliases and exit', action='store_true')
+    group.add_argument('-c', '--clear', help='Clear all the statistics with low frequencies', nargs='?', const='1')
+    return command_parser
+    
+    
+def launch_the_stream():
+    parser = create_parser()
+    arguments = parser.parse_args(argv)
 
     rv = 0
     statistics = UserStat(APPLICATION_NAME, STAT_FILE_NAME)
@@ -68,6 +70,9 @@ def launch_the_stream():
         print(str(statistics))
     elif arguments.aliases:
         print(str(nicknames))
+    elif arguments.clear:
+        statistics.trim(arguments.clear)
+        statistics.save()
     else:
         rv = assemble_command(arguments, statistics, nicknames)
 
