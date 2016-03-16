@@ -71,7 +71,7 @@ def launch_the_stream():
     elif arguments.aliases:
         print(str(nicknames))
     elif arguments.clear:
-        statistics.trim(arguments.clear)
+        statistics.trim(int(arguments.clear))
         statistics.save()
     else:
         rv = assemble_command(arguments, statistics, nicknames)
