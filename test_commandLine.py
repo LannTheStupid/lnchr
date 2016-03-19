@@ -26,5 +26,12 @@ class CommandLineTestCase(unittest.TestCase):
         parsed = self.parser.parse_args(['-c'])
         self.assertEqual(parsed.clear, '1')
 
+    def test_regression(self):
+        parsed = self.parser.parse_args(['http://twitch.tv/holly_forve'])
+        self.assertFalse(parsed.mode)
+        self.assertEqual(parsed.streamer, 'http://twitch.tv/holly_forve')
+        parsed = self.parser.parse_args(['http://twitch.tv/holly_forve', 'video'])
+        self.assertEqual(parsed.streamer, 'http://twitch.tv/holly_forve')
+
 if __name__ == '__main__':
     unittest.main()

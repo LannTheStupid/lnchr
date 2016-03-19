@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 from subprocess import call
-from sys import stderr, argv
+from sys import stderr, argv, exit
 
 from rfc3987 import match
 
@@ -45,21 +45,27 @@ def assemble_command(arguments, statistics, nicknames):
         print('The real execution starts here')
         return call(exec_string, shell=False)
 
+
 def create_parser():
     command_parser = ArgumentParser(description='Wrapper for livestreamer tool')
     command_parser.add_argument('streamer', nargs='?', help="Streamer's nick name or URL of the stream")
     command_parser.add_argument('mode', nargs='?', help='Video or audio only', choices=['audio', 'video'])
+    command_parser.add_argument('-n', '--dry-run', help='Write the command string to stdout, but do not execute it',
+                       action='store_true')
     group = command_parser.add_mutually_exclusive_group()
-    group.add_argument('-n', '--dry-run', help='Write the command string to stdout, but do not execute it', action='store_true')
     group.add_argument('-s', '--stat', help='Print usage statistics and exit', action='store_true')
     group.add_argument('-a', '--aliases', help='Print available aliases and exit', action='store_true')
-    group.add_argument('-c', '--clear', help='Clear all the statistics with low frequencies', nargs='?', const='1')
+    group.add_argument('-c', '--clear', help='Clear all the statistics with frequencies less than parameter (1 by default)', nargs='?', const='1')
     return command_parser
-    
-    
+
+
 def launch_the_stream():
     parser = create_parser()
-    arguments = parser.parse_args(argv)
+    if len(argv) == 1:
+        parser.print_help()
+        exit(1)
+
+    arguments = parser.parse_args()
 
     rv = 0
     statistics = UserStat(APPLICATION_NAME, STAT_FILE_NAME)
@@ -71,8 +77,9 @@ def launch_the_stream():
     elif arguments.aliases:
         print(str(nicknames))
     elif arguments.clear:
-        statistics.trim(int(arguments.clear))
+        trimmed = statistics.trim(int(arguments.clear))
         statistics.save()
+        print("Statistics cleared: {0}".format(trimmed))
     else:
         rv = assemble_command(arguments, statistics, nicknames)
 
