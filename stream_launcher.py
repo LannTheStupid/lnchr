@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from subprocess import call
 from sys import stderr, argv, exit
 
-from rfc3987 import match
+from rfc3987 import match, parse
 
 from application_local_file import Nicknames, UserStat
 
@@ -56,6 +56,7 @@ def create_parser():
     group.add_argument('-s', '--stat', help='Print usage statistics and exit', action='store_true')
     group.add_argument('-a', '--aliases', help='Print available aliases and exit', action='store_true')
     group.add_argument('-c', '--clear', help='Clear all the statistics with frequencies less than parameter (1 by default)', nargs='?', const='1')
+    group.add_argument('-l', '--let', help="Assign an alias to the stream's URL", nargs=2)
     return command_parser
 
 
@@ -77,9 +78,18 @@ def launch_the_stream():
     elif arguments.aliases:
         print(str(nicknames))
     elif arguments.clear:
-        trimmed = statistics.trim(int(arguments.clear))
+        trimmed = statistics.fltr(lambda key, value: value > int(arguments.clear))
         statistics.save()
         print("Statistics cleared: {0}".format(trimmed))
+    elif len(arguments.let) == 2:
+        (nick, URL) = arguments.let
+        nicknames.assign(nick, URL)
+        # Extract the last part of URL path as a streamer nick
+        streamer = [x for x in parse(URL)['path'].split('/') if x][-1]
+        trimmed = statistics.fltr(lambda key, value: streamer not in key)
+        statistics.save()
+        nicknames.save()
+        print("{0} was assigned to {1}; {2} statistics records cleaned".format(nick, URL, trimmed))
     else:
         rv = assemble_command(arguments, statistics, nicknames)
 

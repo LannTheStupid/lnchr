@@ -42,6 +42,12 @@ class Nicknames(ApplicationLocalFile):
         else:
             return False
 
+    def assign(self, nick, URL):
+        self.nick_dict[nick] = URL
+
+    def save(self):
+        super().save(self.nick_dict)
+
     def __str__(self):
         return pformat(sorted(self.nick_dict.items()))
 
@@ -63,11 +69,10 @@ class UserStat(ApplicationLocalFile):
     def load(self):
         self.urlCounter = super().load()
 
-    def trim(self, threshold):
+    def fltr(self, pred):
         before = len(self.urlCounter)
-        self.urlCounter = {k: v for (k,v) in self.urlCounter.items() if v > threshold}
-        after = len(self.urlCounter)
-        return before - after
+        self.urlCounter = {k: v for (k, v) in self.urlCounter.items() if pred(k, v)}
+        return before - len(self.urlCounter)
 
     def __str__(self):
         if self.urlCounter:
