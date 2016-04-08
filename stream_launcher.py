@@ -89,7 +89,7 @@ def launch_the_stream():
         trimmed = statistics.fltr(lambda key, value: streamer not in key)
         statistics.save()
         nicknames.save()
-        print("{0} was assigned to {1}; {2} statistics records cleaned".format(nick, URL, trimmed))
+        print("{0} was assigned to {1}; Statistics cleared: {2}".format(nick, URL, trimmed))
     else:
         rv = assemble_command(arguments, statistics, nicknames)
 
