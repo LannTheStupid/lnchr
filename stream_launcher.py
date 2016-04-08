@@ -81,7 +81,7 @@ def launch_the_stream():
         trimmed = statistics.fltr(lambda key, value: value > int(arguments.clear))
         statistics.save()
         print("Statistics cleared: {0}".format(trimmed))
-    elif len(arguments.let) == 2:
+    elif (arguments.let and len(arguments.let) == 2):
         (nick, URL) = arguments.let
         nicknames.assign(nick, URL)
         # Extract the last part of URL path as a streamer nick
