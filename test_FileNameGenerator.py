@@ -3,10 +3,8 @@ import unittest
 import unittest.mock
 
 from datetime import date
-from pathlib  import PurePath
 
 from recorder_file_handler import file_name_generator
-from recorder_file_handler import name_to_path
 
 class RecordFileNameGeneratorTestCase(unittest.TestCase):
 
@@ -23,12 +21,3 @@ class RecordFileNameGeneratorTestCase(unittest.TestCase):
         for fname in file_name_generator('fido'):
             pass
         self.assertEqual(fname, 'fido.1980.07.05.9.ts')
-
-
-class PathToPurePathConverterTest(unittest.TestCase):
-
-    def test_unix_path(self):
-        self.skipTest('Not Yet Implemented')
-
-    def test_windows_path(self):
-        self.assertEqual(name_to_path(r'c:\tmp'), PurePath('c:/tmp'))
