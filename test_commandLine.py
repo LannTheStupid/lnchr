@@ -12,7 +12,7 @@ class CommandLineTestCase(unittest.TestCase):
 
         self.assertRaises(argparse.ArgumentError)
 
-    def test_stattistics(self):
+    def test_statistics(self):
         parsed = self.parser.parse_args(['-s', 'http://twitch.tv/belkao_o', 'video'])
 
         self.assertEqual(parsed.streamer, 'http://twitch.tv/belkao_o')
