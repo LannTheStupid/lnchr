@@ -44,7 +44,6 @@ def record_and_report(dry_run, exec_string):
         print(exec_string)
         rv = 0
     else:
-        print('The recorder starter')
         start_time = time()
         rv = call(exec_string)
         delta_time = time() - start_time
@@ -61,8 +60,9 @@ def record(arguments, nicknames):
         exec_string = exec_string_stem + ' ' + filename
         try:
             print('Recording stream', alias, 'from', url)
-            rv = record_and_report(arguments, exec_string)
+            rv = record_and_report(arguments.dry_run, exec_string)
             print('Recorded into', filename, 'with return code', rv, 'attempt', attempt)
+            print('Sleeping for (seconds):', arguments.time)
             sleep(arguments.time)
         except OSError as err:
             print('Error launching livestreamer: {0}, code {1}'.format(err.strerror, err.errno))
@@ -78,7 +78,7 @@ def record_the_stream():
                                 type=PurePath,
                                 default=DEFAULT_ROOT_DIRECTORY,
                                 )
-    command_parser.add_argument('-t', '--time', help='Time to wait between attempts to reconnect to the stream',
+    command_parser.add_argument('-t', '--time', help='Time (in seconds) between attempts to reconnect to the stream',
                                 default=DEFAULT_TIMEOUT, type=float)
     command_parser.add_argument('-r', '--retries', help='Number of attempts before the stream is considered down',
                                 default=DEFAULT_ATTEMPTS, type=int)
