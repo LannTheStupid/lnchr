@@ -39,7 +39,7 @@ def assemble_command(arguments, statistics, nicknames):
 
     if arguments.dry_run:
         print("The resulting command string:")
-        print("[ ", exec_string, " ]")
+        print("[", exec_string, "]")
         return 0
     else:
         print('The real execution starts here')
