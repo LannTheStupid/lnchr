@@ -46,8 +46,7 @@ def record_and_report(dry_run, exec_string):
     else:
         start_time = time()
         rv = call(exec_string)
-        delta_time = time() - start_time
-        print('Recording time:', timedelta(seconds = delta_time))
+        if rv == 0: print('Recording time:', timedelta(seconds = round(time() - start_time)))
     return rv
 
 
@@ -61,8 +60,8 @@ def record(arguments, nicknames):
         try:
             print('Recording stream', alias, 'from', url)
             rv = record_and_report(arguments.dry_run, exec_string)
-            print('Recorded into', filename, 'with return code', rv, 'attempt', attempt)
-            print('Sleeping for (seconds):', arguments.time)
+            print('Attempt', attempt, 'return code', rv)
+            print('Sleep for', arguments.time, 's')
             sleep(arguments.time)
         except OSError as err:
             print('Error launching livestreamer: {0}, code {1}'.format(err.strerror, err.errno))

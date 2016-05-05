@@ -38,6 +38,17 @@ class RecordFileNameGeneratorTestCase(unittest.TestCase):
         self.assertEqual(next(file_name_gen), 'fido.1980.07.05.001.ts')
         self.assertEqual(next(file_name_gen), 'fido.1980.07.05.002.ts')
 
+    @unittest.mock.patch("recorder_file_handler.date", autospec=True)
+    def test_works_for_1_and_2_attempts(self, mock_date):
+        mock_date.today.return_value = date(1945, 8, 6)
+        results = [fname for fname in file_name_generator('john', 1)]
+        self.assertEqual(results[0], 'john.1945.08.06.1.ts')
+        self.assertEqual(results[-1], 'john.1945.08.06.9.ts')
+        results = [fname for fname in file_name_generator('jack', 2)]
+        self.assertEqual(results[0], 'jack.1945.08.06.1.ts')
+        self.assertEqual(results[-1], 'jack.1945.08.06.9.ts')
+
+
 class GetFileNameTestCase(unittest.TestCase):
 
     @unittest.mock.patch("recorder_file_handler.date", autospec=True)
