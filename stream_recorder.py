@@ -1,8 +1,9 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentTypeError
 from subprocess import call
 from pathlib import PurePath
 from time import sleep, time
 from datetime import timedelta
+from sys import argv, exit
 
 from rfc3987 import match, parse
 
@@ -51,7 +52,7 @@ def record_and_report(dry_run, exec_string):
 
 
 def record(arguments, nicknames):
-    (alias, url) = parse_streamer_url(arguments.streamer, nicknames)
+    (alias, url) = parse_streamer_url(arguments.streamer[0], nicknames)
     if not alias:
         exit(1)
     exec_string_stem = 'livestreamer ' + url + ' best -o'
@@ -69,23 +70,41 @@ def record(arguments, nicknames):
     return 0
 
 
-def record_the_stream():
+def natural_number(parameter):
+    value = int(parameter)
+    if value < 1:
+        msg = '{0} is not a natural number'.format(parameter)
+        raise ArgumentTypeError(msg)
+    return value
+
+
+def create_parser():
     command_parser = ArgumentParser(description='Stream Recorder. Uses livestreamer to get the data')
-    command_parser.add_argument('streamer', nargs='?', help="Streamer's nick name or URL of the stream")
+    command_parser.add_argument('streamer', nargs=1, help="Streamer's nick name or URL of the stream")
     command_parser.add_argument('-d', '--directory',
                                 help='The directory where recorded files are stored.',
                                 type=PurePath,
                                 default=DEFAULT_ROOT_DIRECTORY,
                                 )
     command_parser.add_argument('-t', '--time', help='Time (in seconds) between attempts to reconnect to the stream',
-                                default=DEFAULT_TIMEOUT, type=float)
+                                default=DEFAULT_TIMEOUT, type=natural_number)
     command_parser.add_argument('-r', '--retries', help='Number of attempts before the stream is considered down',
-                                default=DEFAULT_ATTEMPTS, type=int)
+                                default=DEFAULT_ATTEMPTS, type=natural_number)
     group = command_parser.add_mutually_exclusive_group()
     group.add_argument('-n', '--dry-run', help='Write the command string to stdout, but do not execute it',
                        action='store_true')
     group.add_argument('-a', '--aliases', help='Print available aliases and exit',
                        action='store_true')
+    return command_parser
+
+
+def record_the_stream():
+    command_parser = create_parser()
+
+    if len(argv) == 1:
+        command_parser.print_help()
+        exit(1)
+
     arguments = command_parser.parse_args()
 
     rv = 0
