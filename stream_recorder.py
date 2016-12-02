@@ -55,7 +55,7 @@ def record(arguments, nicknames):
     (alias, url) = parse_streamer_url(arguments.streamer[0], nicknames)
     if not alias:
         exit(1)
-    exec_string_stem = 'livestreamer ' + url + ' best -o'
+    exec_string_stem = 'streamlink ' + url + ' best -o'
     for (attempt, filename) in next_try(arguments.retries, arguments.directory, alias):
         exec_string = exec_string_stem + ' ' + filename
         try:
@@ -65,7 +65,7 @@ def record(arguments, nicknames):
             print('Sleep for', arguments.time, 's')
             sleep(arguments.time)
         except OSError as err:
-            print('Error launching livestreamer: {0}, code {1}'.format(err.strerror, err.errno))
+            print('Error launching streamlink: {0}, code {1}'.format(err.strerror, err.errno))
             exit (2)
     return 0
 
@@ -79,7 +79,7 @@ def natural_number(parameter):
 
 
 def create_parser():
-    command_parser = ArgumentParser(description='Stream Recorder. Uses livestreamer to get the data')
+    command_parser = ArgumentParser(description='Stream Recorder. Uses streamlink to get the data')
     command_parser.add_argument('streamer', nargs=1, help="Streamer's nick name or URL of the stream")
     command_parser.add_argument('-d', '--directory',
                                 help='The directory where recorded files are stored.',

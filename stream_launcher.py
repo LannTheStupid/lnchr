@@ -34,7 +34,7 @@ def assemble_command(arguments, statistics, nicknames):
         quality = 'worst'
         player_command = '--novideo'
 
-    exec_string = "livestreamer " + "--player \"'C:\\Program Files\\VideoLAN\\VLC\\vlc.exe' " + player_command + "\"" \
+    exec_string = "streamlink " + "--player \"'C:\\Program Files\\VideoLAN\\VLC\\vlc.exe' " + player_command + "\"" \
                   + ' ' + url + ' ' + quality
 
     if arguments.dry_run:
@@ -47,7 +47,7 @@ def assemble_command(arguments, statistics, nicknames):
 
 
 def create_parser():
-    command_parser = ArgumentParser(description='Wrapper for livestreamer tool')
+    command_parser = ArgumentParser(description='Wrapper for streamlink tool')
     command_parser.add_argument('streamer', nargs='?', help="Streamer's nick name or URL of the stream")
     command_parser.add_argument('mode', nargs='?', help='Video or audio only', choices=['audio', 'video'])
     command_parser.add_argument('-n', '--dry-run', help='Write the command string to stdout, but do not execute it',
