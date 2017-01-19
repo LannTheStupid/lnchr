@@ -34,7 +34,7 @@ def assemble_command(arguments, statistics, nicknames):
         quality = 'worst'
         player_command = '--novideo'
 
-    exec_string = "streamlink " + "--player \"'C:\\Program Files\\VideoLAN\\VLC\\vlc.exe' " + player_command + "\"" \
+    exec_string = "streamlink " + "--player \"C:\\Program Files\\VideoLAN\\VLC\\vlc.exe " + player_command + "\"" \
                   + ' ' + url + ' ' + quality
 
     if arguments.dry_run:
