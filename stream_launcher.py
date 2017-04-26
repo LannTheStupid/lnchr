@@ -29,7 +29,7 @@ def assemble_command(arguments, statistics, nicknames):
         quality = 'best'
         player_command = '--file-caching=10000'
     elif url.find('twitch') >= 0:
-        quality = 'audio'
+        quality = 'audio_only'
     else:
         quality = 'worst'
         player_command = '--novideo'
