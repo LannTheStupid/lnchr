@@ -34,16 +34,16 @@ def assemble_command(arguments, statistics, nicknames):
         quality = 'worst'
         player_command = '--novideo'
 
-    exec_string = "streamlink " + "--player \"C:\\Program Files\\VideoLAN\\VLC\\vlc.exe " + player_command + "\"" \
-                  + ' ' + url + ' ' + quality
+    exec_list = ['streamlink', r'--player "C:\Program Files\VideoLAN\VLC\vlc.exe ', player_command, r'"',
+                  url, quality]
 
     if arguments.dry_run:
         print("The resulting command string:")
-        print("[", exec_string, "]")
+        print("[", ' '.join(exec_list), "]")
         return 0
     else:
         print('The real execution starts here')
-        return call(exec_string, shell=False)
+        return call(exec_list, shell=False)
 
 
 def create_parser():
@@ -81,7 +81,7 @@ def launch_the_stream():
         trimmed = statistics.fltr(lambda key, value: value > int(arguments.clear))
         statistics.save()
         print("Statistics cleared: {0}".format(trimmed))
-    elif (arguments.let and len(arguments.let) == 2):
+    elif arguments.let and len(arguments.let) == 2:
         (nick, URL) = arguments.let
         nicknames.assign(nick, URL)
         # Extract the last part of URL path as a streamer nick
