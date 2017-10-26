@@ -5,8 +5,6 @@ import unittest.mock
 from datetime import date
 from pathlib import Path, PurePath
 
-from application_local_file import Nicknames
-
 from recorder_file_handler import file_name_generator
 from recorder_file_handler import get_file_name
 

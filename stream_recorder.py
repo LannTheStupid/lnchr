@@ -9,6 +9,7 @@ from rfc3987 import match, parse
 
 from application_local_file import Nicknames
 from recorder_file_handler import get_file_name
+from runner import Runner
 
 APPLICATION_NAME = 'stream_recorder'
 LAUNCHER_APPLICATION_NAME = 'stream_launcher'
@@ -16,6 +17,12 @@ ALIAS_FILE_NAME = 'aliases.dat'
 DEFAULT_ROOT_DIRECTORY = 'c:\\tmp'
 DEFAULT_TIMEOUT = 120. # (2 minutes)
 DEFAULT_ATTEMPTS = 10
+
+# Return codes from streamlink execution
+FINISHED = 0    # The stream is finished
+NO_STREAM = 1   # There is no stream
+INTERRUPTED = 2 # The stream is stopped
+HOSTED = 3      # The streamer is hosting another stream
 
 
 def parse_streamer_url(url, nicknames):
@@ -39,14 +46,15 @@ def next_try(retries, directory, alias):
         yield(attempt, next(file_name_generator))
 
 
-def record_and_report(dry_run, exec_string):
+def record_and_report(dry_run, exec_args):
     if dry_run:
         print('Dry run invoked. The command string is')
-        print(exec_string)
+        print(' '.join(exec_args))
         rv = 0
     else:
         start_time = time()
-        rv = call(exec_string)
+        runner = Runner(exec_args)
+        rv = runner.run()
         if rv == 0: print('Recording time:', timedelta(seconds = round(time() - start_time)))
     return rv
 
@@ -55,15 +63,16 @@ def record(arguments, nicknames):
     (alias, url) = parse_streamer_url(arguments.streamer[0], nicknames)
     if not alias:
         exit(1)
-    exec_string_stem = 'streamlink ' + url + ' best -o'
+    args_list_stem = ['streamlink', url, 'best', '-o']
     for (attempt, filename) in next_try(arguments.retries, arguments.directory, alias):
-        exec_string = exec_string_stem + ' ' + filename
+        args_list = args_list_stem + [filename]
         try:
+            timeout = arguments.time
             print('Recording stream', alias, 'from', url)
-            rv = record_and_report(arguments.dry_run, exec_string)
-            print('Attempt', attempt, 'return code', rv)
-            print('Sleep for', arguments.time, 's')
-            sleep(arguments.time)
+            rv = record_and_report(arguments.dry_run, args_list)
+            print('Attempt', attempt, 'of', arguments.retries, 'return code', rv)
+            print('Sleep for', timeout, 's')
+            sleep(timeout)
         except OSError as err:
             print('Error launching streamlink: {0}, code {1}'.format(err.strerror, err.errno))
             exit (2)
@@ -72,7 +81,7 @@ def record(arguments, nicknames):
 
 def natural_number(parameter):
     value = int(parameter)
-    if value < 1:
+    if value < 1 or value != parameter:
         msg = '{0} is not a natural number'.format(parameter)
         raise ArgumentTypeError(msg)
     return value
