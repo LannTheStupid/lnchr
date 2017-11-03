@@ -1,10 +1,13 @@
-from subprocess import Popen, PIPE
+import re
+from queue import Empty, Queue
+from subprocess import Popen, PIPE, TimeoutExpired
 from threading import Thread
-from queue import Queue
-import os
+from time import sleep
 
 stringsize = 80
 newline = b'\r'
+POLL_TIMEOUT = 1
+
 
 def my_read_line(in_stream):
     buf = b""
@@ -16,7 +19,6 @@ def my_read_line(in_stream):
             print('pos = ', pos)
         chunk = in_stream.read(stringsize)
 #        print('buf = ', buf, 'chunk = ', chunk)
-        print()
         if not chunk:
             yield buf
             break
@@ -33,7 +35,7 @@ def reader(pipe, q):
         q.put(line)
 
 
-
+# noinspection SpellCheckingInspection
 class Runner:
 
     def __init__(self, args):
@@ -42,14 +44,63 @@ class Runner:
         self.outq = Queue()
         self.errq = Queue()
 
+        self.dispatch_table = [
+            (re.compile(r'(\w+) is hosting (\w+)'), self.handle_hosting),
+            # (re.compile(r'(\w+) is running (\w+)'), self.redirect),
+            # (re.compile(r'[Ee]rror (\d+)'), self.error),
+            (re.compile(r'(.*)'), self.echo),
+        ]
+
+    def handle_hosting(self, ptrns):
+        print(ptrns[1], 'is hosting', ptrns[2], 'terminating recording')
+        self.proc.terminate()
+        return 3
+
+    def echo(self, the_string):
+        print(the_string)
+        return 0
+
+    def dispatch(self, instr):
+        for (regex, func) in self.dispatch_table:
+            found = regex.search(instr)
+            if found:
+                return func(found.groups())
+        print('It should have never happened')
+        return -255
 
     def run(self):
-        proc = Popen(self.args
+        self.proc = Popen(self.args
                     , stdout=PIPE
                     , stderr=PIPE)
-        tstdout = Thread(target=reader, args=(proc.stdout,self.outq,))
+        tstdout = Thread(target=reader, args=(self.proc.stdout,self.outq,))
         tstdout.start()
 
-        tstderr = Thread(target=cr_reader, args=(proc.stderr,self.errq,))
+        tstderr = Thread(target=cr_reader, args=(self.proc.stderr,self.errq,))
         tstderr.start()
 
+        rv = 0
+        while self.proc.poll() is None:
+            try:
+                outstr = self.outq.get_nowait()
+                rv = self.dispatch(outstr)
+            except Empty:
+                pass
+
+            try:
+                errstr = self.errq.get_nowait()
+                print(errstr, end='')
+            except Empty:
+                pass
+
+            sleep(POLL_TIMEOUT)
+
+        try:
+            self.proc.communicate()
+            self.proc.wait(timeout=POLL_TIMEOUT)
+        except TimeoutExpired:
+            print('streamlink did not terminate in time')
+        finally:
+            tstderr.join()
+            tstdout.join()
+
+        return rv

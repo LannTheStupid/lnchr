@@ -1,9 +1,9 @@
 from argparse import ArgumentParser, ArgumentTypeError
-from subprocess import call
-from pathlib import PurePath
-from time import sleep, time
+from collections import defaultdict
 from datetime import timedelta
+from pathlib import PurePath
 from sys import argv, exit
+from time import sleep, time
 
 from rfc3987 import match, parse
 
@@ -19,10 +19,10 @@ DEFAULT_TIMEOUT = 120. # (2 minutes)
 DEFAULT_ATTEMPTS = 10
 
 # Return codes from streamlink execution
-FINISHED = 0    # The stream is finished
 NO_STREAM = 1   # There is no stream
 INTERRUPTED = 2 # The stream is stopped
 HOSTED = 3      # The streamer is hosting another stream
+FINISHED = 4    # The stream is finished
 
 
 def parse_streamer_url(url, nicknames):
@@ -64,12 +64,14 @@ def record(arguments, nicknames):
     if not alias:
         exit(1)
     args_list_stem = ['streamlink', url, 'best', '-o']
+    timeout_table = defaultdict(int(arguments.time))
+    timeout_table.update(HOSTED=3600, FINISHED=7200)
     for (attempt, filename) in next_try(arguments.retries, arguments.directory, alias):
         args_list = args_list_stem + [filename]
         try:
-            timeout = arguments.time
             print('Recording stream', alias, 'from', url)
             rv = record_and_report(arguments.dry_run, args_list)
+            timeout = timeout_table[rv]
             print('Attempt', attempt, 'of', arguments.retries, 'return code', rv)
             print('Sleep for', timeout, 's')
             sleep(timeout)
