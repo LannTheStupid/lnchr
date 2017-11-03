@@ -64,15 +64,15 @@ def record(arguments, nicknames):
     if not alias:
         exit(1)
     args_list_stem = ['streamlink', url, 'best', '-o']
-    timeout_table = defaultdict(int(arguments.time))
-    timeout_table.update(HOSTED=3600, FINISHED=7200)
+    timeout_table = defaultdict(lambda: arguments.time)
+    timeout_table.update({HOSTED: 3600, FINISHED: 7200})
     for (attempt, filename) in next_try(arguments.retries, arguments.directory, alias):
         args_list = args_list_stem + [filename]
         try:
             print('Recording stream', alias, 'from', url)
             rv = record_and_report(arguments.dry_run, args_list)
             timeout = timeout_table[rv]
-            print('Attempt', attempt, 'of', arguments.retries, 'return code', rv)
+            print('Attempt', attempt, 'of', arguments.retries, 'return code = ', rv)
             print('Sleep for', timeout, 's')
             sleep(timeout)
         except OSError as err:
