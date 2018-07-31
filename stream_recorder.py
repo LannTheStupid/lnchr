@@ -39,14 +39,14 @@ def next_try(retries, directory, alias):
         yield(attempt, next(file_name_generator))
 
 
-def record_and_report(dry_run, exec_string):
+def record_and_report(dry_run, exec_list):
     if dry_run:
         print('Dry run invoked. The command string is')
-        print(exec_string)
-        rv = 0
+        print("[", ' '.join(exec_list), "]")
+        raise Exception('Dry run: exiting.')
     else:
         start_time = time()
-        rv = call(exec_string)
+        rv = call(exec_list, shell=False)
         if rv == 0: print('Recording time:', timedelta(seconds = round(time() - start_time)))
     return rv
 
@@ -55,12 +55,12 @@ def record(arguments, nicknames):
     (alias, url) = parse_streamer_url(arguments.streamer[0], nicknames)
     if not alias:
         exit(1)
-    exec_string_stem = 'streamlink ' + url + ' best -o'
+    exec_list_head = ['streamlink', url, 'best']
     for (attempt, filename) in next_try(arguments.retries, arguments.directory, alias):
-        exec_string = exec_string_stem + ' ' + filename
+        exec_list = exec_list_head + [filename]
         try:
             print('Recording stream', alias, 'from', url)
-            rv = record_and_report(arguments.dry_run, exec_string)
+            rv = record_and_report(arguments.dry_run, exec_list)
             print('Attempt', attempt, 'return code', rv)
             print('Sleep for', arguments.time, 's')
             sleep(arguments.time)
