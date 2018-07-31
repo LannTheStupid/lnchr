@@ -56,6 +56,9 @@ def record(arguments, nicknames):
     if not alias:
         exit(1)
     exec_list_head = ['streamlink', url, 'best']
+    if url.find('twitch') >= 0:
+        exec_list_head.append('--twitch-disable-hosting')
+    exec_list_head.append('-o')
     for (attempt, filename) in next_try(arguments.retries, arguments.directory, alias):
         exec_list = exec_list_head + [filename]
         try:
