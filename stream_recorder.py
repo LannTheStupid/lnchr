@@ -64,7 +64,7 @@ def record(arguments, nicknames):
         try:
             print('Recording stream', alias, 'from', url)
             rv = record_and_report(arguments.dry_run, exec_list)
-            print('Attempt', attempt, 'return code', rv)
+            print('Attempt', attempt, 'of', arguments.retries, 'return code', rv)
             print('Sleep for', arguments.time, 's')
             sleep(arguments.time)
         except OSError as err:
