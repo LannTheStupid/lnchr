@@ -74,11 +74,12 @@ def record(arguments, nicknames):
 
 
 def natural_number(parameter):
-    value = int(parameter)
-    if value < 1 or value != parameter:
+    i = int(parameter)
+    f = float(parameter)
+    if i < 1 or i != f:
         msg = '{0} is not a natural number'.format(parameter)
         raise ArgumentTypeError(msg)
-    return value
+    return i
 
 
 def create_parser():
