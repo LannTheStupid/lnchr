@@ -16,7 +16,7 @@ class ApplicationLocalFile:
             with open(self.file_name, 'r') as f:
                 return load(f)
         except:
-            pass
+            return dict()
 
     def save(self, o):
         if o:
